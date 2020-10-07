@@ -1,0 +1,6 @@
+use ${hiveconf:db};
+create table ${hiveconf:tb}
+(stdname string, id int,year int, dept string)
+row format delimited fields terminated by ',';
+load data local inpath'${hiveconf:path}' into table ${hiveconf:tb};
+select * from ${hiveconf:tb};

@@ -1,0 +1,5 @@
+sqoop import --connect jdbc:mysql://localhost/retail_db --username root -P --table customers --target-dir /user/hive/warehouse/customersqoopto
+
+or
+
+sqoop import --connect jdbc:mysql://localhost/sjc2020 --username root -P --table student_detail --target-dir /user/cloudera/robin/studentsqoopto
