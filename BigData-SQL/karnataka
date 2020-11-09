@@ -1,0 +1,39 @@
+--MYSQL
+create database karnataka;
+use karnataka;
+
+create table farm(State_Name varchar(30), District_Name varchar(30),Crop_year varchar(30),Season char(20),Crop varchar(20),Area int(10), Production int(10));
+
+describe farm;
+
+load data local infile '/home/cloudera/Desktop/karnataka.csv' into table farm fields terminated by ',' enclosed by '"' ignore 1 line;
+
+
+--SQOOP
+
+sqoop import --connect jdbc:mysql://localhost/karnataka --username root -P --table farm --target-dir /user/cloudera/robin/farmsqoop -m1
+
+--HIVE
+create database agriculture;
+
+use agriculture;
+
+create table farm_data(Staye_Name varchar(30), District_Name varchar(30),Crop_year varchar(30),Season char(20),Crop varchar(20),Area int, Production int) row format delimited fields terminated by ',';
+
+load data inpath '/user/cloudera/robin/farmsqoop/part-m-00000' into table farm_data;
+
+select * from farm_data limit 5;
+
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.exec.max.dynamic.partitions=1000;
+set hive.exec.max.dynamic.partitions.pernode=250;
+set hive.enforce.bucketing=true;
+
+create table farm_partition(Crop_Year varchar(20),Season varchar(20), Crop varchar(30),Area int,Production int) partitioned by(State_Name varchar(30),District_Name varchar(30)) clustered by(Crop_Year) sorted by(Area) into 5 buckets row format delimikted fields terminated by ',';
+
+insert overwrite table farm_partition partition(State_Name,District_Name) select Crop_Year,Season,Crop Area,Production,State_Name,District_Name from farm_data;
+
+select * fro farm_partition limit 5;
+
+drop table farm_data;
+
